@@ -404,7 +404,7 @@ end
 
 describe 'The #wait_for_digit method' do
 
-  include DialplanCommandTestHelpersspec/adhearsion/voip/ast
+  include DialplanCommandTestHelpers
 
   it 'should return a string for the digit that was pressed' do
     digits = %w{0 1 # * 9}.map{|c| c.ord}
@@ -575,6 +575,9 @@ describe 'The #play_or_speak method' do
     mock_call.should_receive(:speak).with('hello', {:engine=>:unimrcp, :interruptible => true}).once.and_return '5'
     mock_call.play_or_speak({audio_file => { :text => 'hello', :engine => :unimrcp, :interruptible => true
 }}).should == '5'
+  end
+
+end
 
 describe 'verbose' do
   include DialplanCommandTestHelpers
@@ -584,8 +587,18 @@ describe 'verbose' do
     level = 42
     pbx_should_respond_with_success
     mock_call.verbose(message, level)
-    pbx_should_have_been_sent "VERBOSE \"#{message}\" #{level}" 
-    added "verbose" to spec
+    pbx_should_have_been_sent "VERBOSE \"#{message}\" \"#{level}\"" 
+  end
+
+end
+
+describe 'hangup' do
+  include DialplanCommandTestHelpers
+
+  it 'should return HANGUP' do
+    pbx_should_respond_with_success
+    mock_call.hangup()
+    pbx_should_have_been_sent "HANGUP"
   end
 
 end
