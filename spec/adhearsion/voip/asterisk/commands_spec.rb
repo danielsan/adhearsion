@@ -1266,6 +1266,12 @@ describe 'The voicemail_main command' do
     end
   end
 
+  it "should raise an exception if the folder name is an empty string" do
+    the_following_code {
+      mock_call.voicemail_main :folder => ''
+    }.should raise_error
+  end
+
 end
 
 describe 'the check_voicemail command' do
