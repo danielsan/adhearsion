@@ -376,9 +376,11 @@ module Adhearsion
         #
         # +:format+ - the format of the file to be recorded.  This will over-ride a implicit format in a file extension and append a .<format> to the end of the file.
         #
+        # +:raw+ - set to true to get the raw asterisk output instead of the normal symbols
+        #
         # Silence and maxduration is specified in seconds.
         # 
-        # @return [Symbol] One of the follwing..... :hangup, :write_error, :success_dtmf, :success_timeout  
+        # @return [Symbol] One of the follwing..... :hangup, :write_error, :success_dtmf, :success_timeout , or the raw output 
         #        
         # A sound file will be recorded to the specifed file unless a :write_error is returned.  A :success_dtmf is
         # for when a call was ended with a DTMF tone.  A :success_timeout is returned when a call times out due to 
@@ -462,7 +464,9 @@ module Adhearsion
           resp = response 'RECORD FILE', *response_params
           # If the user hangs up before the recording is entered, -1 is returned by asterisk and RECORDED_FILE
           # will not contain the name of the file, even though it IS in fact recorded.
-          if resp.match /hangup/
+          if options.has_key?(:raw) and options[:raw]
+            response_values << resp
+          elsif resp.match /hangup/
             response_values << :hangup
           elsif resp.match /writefile/
             response_values << :write_error 

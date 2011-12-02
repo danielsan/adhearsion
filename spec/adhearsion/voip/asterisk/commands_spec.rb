@@ -790,6 +790,11 @@ describe 'the #record_to_file method' do
     mock_call.record_to_file('foo').should == :success_timeout
   end  
 
+  it 'should return a :silence_timeout for .wav, .WAV format files where the recording was muted' do
+    mock_call.should_receive(:response).once.with("RECORD FILE", "foo", "gsm", "#", -1, 0, "BEEP").and_return("200 result=0 (timeout) endpos=21600\n")
+    mock_call.record_to_file('foo', :raw => true).should == "200 result=0 (timeout) endpos=21600\n" 
+  end
+
   it 'not send a beep if a :beep=>nil is passed in' do
     mock_call.should_receive(:response).once.with("RECORD FILE", "foo", "gsm", "#", -1, 0).and_return("200 result=0 (timeout) endpos=21600\n")
     mock_call.record_to_file('foo', :beep => nil).should == :success_timeout
