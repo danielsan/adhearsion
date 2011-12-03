@@ -380,7 +380,7 @@ module Adhearsion
         #
         # Silence and maxduration is specified in seconds.
         # 
-        # @return [Symbol] One of the follwing..... :hangup, :write_error, :success_dtmf, :success_timeout , or the raw output 
+        # @return [Symbol] One of the following..... :hangup, :write_error, :success_dtmf, :success_timeout ,or the raw output 
         #        
         # A sound file will be recorded to the specifed file unless a :write_error is returned.  A :success_dtmf is
         # for when a call was ended with a DTMF tone.  A :success_timeout is returned when a call times out due to 
@@ -466,16 +466,18 @@ module Adhearsion
           # will not contain the name of the file, even though it IS in fact recorded.
           if options.has_key?(:raw) and options[:raw]
             response_values << resp
-          elsif resp.match /hangup/
-            response_values << :hangup
-          elsif resp.match /writefile/
-            response_values << :write_error 
-          elsif resp.match /dtmf/
-            response_values << :success_dtmf
-          elsif resp.match /timeout/
-            response_values << :success_timeout
+          else
+            response_values << case resp
+                            when /hangup/
+                              :hangup
+                            when /writefile/
+                              :write_error 
+                            when /dtmf/
+                              :success_dtmf
+                            when /timeout/
+                              :success_timeout
+                            end
           end
-
           response_values
         end
 
