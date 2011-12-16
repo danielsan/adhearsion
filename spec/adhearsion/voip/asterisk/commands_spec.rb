@@ -875,11 +875,10 @@ describe 'The #record_to_file! method' do
   include DialplanCommandTestHelpers
 
   it "should throw an exception the beep file passed in can't be played" do
-    mock_call.should_receive(:execute).once.with(:playback, 'my_awesome_beep.wav').and_return(false)
+    mock_call.should_receive(:execute).once.with(:playback, 'my_awesome_beep.wav').and_return('FAILED')
     pbx_should_respond_with_playback_failure
-    mock_call.should_receive(:response).once.with("RECORD FILE", "foo", "gsm", "26", -1, 0).and_return("200 result=0 (timeout) endpos=21600\n")
     the_following_code {
-      mock_call.record_to_file!('foo', :beep => 'my_awesome_beep.wav', :escapedigits => '26').should == :success_timeout
+      mock_call.record_to_file!('foo', :beep => 'my_awesome_beep.wav', :escapedigits => '26').should
     }.should raise_error Adhearsion::VoIP::PlaybackError
   end  
 

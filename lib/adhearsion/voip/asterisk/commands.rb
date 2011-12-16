@@ -401,11 +401,9 @@ module Adhearsion
         # This works the same record_to_file except is throws an exception if a playback or write error occurs.
         #
         def record_to_file!(*args)
-           # raise PlaybackError, "Playback failed with PLAYBACKSTATUS: #{playback.inspect}.  The raw response was #{response.inspect}."
+          args.last[:raise_playback_exception] = true if args.last.kind_of?(Hash) 
           return_values = base_record_to_file(*args)
-          if return_values.first == :playback_error
-            raise PlaybackError, "Playback failed with PLAYBACKSTATUS: #{return_values.second.inspect}."
-          elsif return_values.first == :write_error
+          if return_values.first == :write_error
             raise RecordError, "Record failed on write."
           end
           return_values.first
@@ -450,9 +448,10 @@ module Adhearsion
           if !options.has_key? :beep 
             response_params << 'BEEP'
           elsif options[:beep]
-            unless (play_soundfile options[:beep])
-              response_values << :playback_error
-              response_values << PLAYBACK_FAILED
+            if options[:raise_playback_exception]
+              play_soundfile! options[:beep]
+            else
+              play_soundfile options[:beep]
             end
           end
 
