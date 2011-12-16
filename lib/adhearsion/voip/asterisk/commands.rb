@@ -46,6 +46,7 @@ module Adhearsion
         } unless defined? DYNAMIC_FEATURE_EXTENSIONS
 
         PLAYBACK_SUCCESS = 'SUCCESS' unless defined? PLAYBACK_SUCCESS
+        PLAYBACK_FAILED  = 'FAILED' unless defined? PLAYBACK_FAILED
 
         # Utility method to write to pbx.
         # @param [String] message raw message
@@ -449,11 +450,9 @@ module Adhearsion
           if !options.has_key? :beep 
             response_params << 'BEEP'
           elsif options[:beep]
-            play_soundfile options[:beep]
-            playback_response = get_variable('PLAYBACKSTATUS')
-            if playback_response != PLAYBACK_SUCCESS 
+            unless (play_soundfile options[:beep])
               response_values << :playback_error
-              response_values << playback_response
+              response_values << PLAYBACK_FAILED
             end
           end
 

@@ -254,6 +254,23 @@ module ConfirmationManagerTestHelper
   end
 end
 
+describe 'global variable conditional setters' do
+  it 'should not set the default values for constants if they have already been set' do
+    mock_call  = Class.new
+    mock_call.const_set('PLAYBACK_SUCCESS', 'this rocks')
+    mock_call.const_set('PLAYBACK_FAILED', 'this sucks')
+    mock_call.const_set('RESPONSE_PREFIX', '666')
+    mock_call.const_set('DIAL_STATUSES', 'dead')
+    mock_call.const_set('DYNAMIC_FEATURE_EXTENSIONS', 'dead')
+    mock_call.send(:include, Adhearsion::VoIP::Asterisk::Commands)
+    mock_call.const_get('PLAYBACK_SUCCESS').should == 'this rocks'
+    mock_call.const_get('PLAYBACK_FAILED').should ==  'this sucks'
+    mock_call.const_get('RESPONSE_PREFIX').should ==  '666'
+    mock_call.const_get('DIAL_STATUSES').should ==  'dead'
+    mock_call.const_get('DYNAMIC_FEATURE_EXTENSIONS').should ==  'dead'
+  end
+end
+
 describe 'Asterisk VoIP Commands' do
   include DialplanCommandTestHelpers
 
@@ -828,14 +845,12 @@ describe 'the #record_to_file method' do
   it 'play a passed in beep file if it is passed in' do
     mock_call.should_receive(:execute).once.with(:playback, 'my_awesome_beep.wav').and_return(true)
     pbx_should_respond_with_playback_success
-    pbx_should_respond_with_playback_success
     mock_call.should_receive(:response).once.with("RECORD FILE", "foo", "gsm", "26", -1, 0).and_return("200 result=0 (timeout) endpos=21600\n")
     mock_call.record_to_file('foo', :beep => 'my_awesome_beep.wav', :escapedigits => '26').should == :success_timeout
   end  
 
   it "should silently fail if the beep file passed in can't be played" do
     mock_call.should_receive(:execute).once.with(:playback, 'my_awesome_beep.wav').and_return(true)
-    pbx_should_respond_with_playback_failure
     pbx_should_respond_with_playback_failure
     mock_call.should_receive(:response).once.with("RECORD FILE", "foo", "gsm", "26", -1, 0).and_return("200 result=0 (timeout) endpos=21600\n")
     mock_call.record_to_file('foo', :beep => 'my_awesome_beep.wav', :escapedigits => '26').should == :success_timeout
@@ -861,7 +876,6 @@ describe 'The #record_to_file! method' do
 
   it "should throw an exception the beep file passed in can't be played" do
     mock_call.should_receive(:execute).once.with(:playback, 'my_awesome_beep.wav').and_return(false)
-    pbx_should_respond_with_playback_failure
     pbx_should_respond_with_playback_failure
     mock_call.should_receive(:response).once.with("RECORD FILE", "foo", "gsm", "26", -1, 0).and_return("200 result=0 (timeout) endpos=21600\n")
     the_following_code {
